@@ -25,32 +25,6 @@ price INTEGER,
 status TEXT
 )
 """)
-# ===== THÊM PHÒNG MỚI (chỉ thêm nếu chưa tồn tại) =====
-
-new_rooms = []
-
-# Standard 103–120
-for i in range(103, 121):
-    new_rooms.append((str(i), "Standard", 500000, "Available"))
-
-# Deluxe 203–220
-for i in range(203, 221):
-    new_rooms.append((str(i), "Deluxe", 800000, "Available"))
-
-# Suite 303–315
-for i in range(303, 316):
-    new_rooms.append((str(i), "Suite", 1200000, "Available"))
-
-# VIP Villa 402–405
-for i in range(402, 406):
-    new_rooms.append((str(i), "VIP Villa", 2500000, "Available"))
-
-cur.executemany("""
-INSERT OR IGNORE INTO rooms(room,type,price,status)
-VALUES(?,?,?,?)
-""", new_rooms)
-
-conn.commit()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS bookings(
@@ -70,15 +44,23 @@ conn.commit()
 
 # Tạo phòng lần đầu
 if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
-    rooms = [
-        ("101","Standard",500000,"Available"),
-        ("102","Standard",500000,"Available"),
-        ("201","Deluxe",800000,"Available"),
-        ("202","Deluxe",800000,"Available"),
-        ("301","Suite",1200000,"Available"),
-        ("302","Suite",1200000,"Available"),
-        ("401","VIP Villa",2500000,"Available")
-    ]
+rooms = []
+
+# Standard: 101–110
+for i in range(101, 111):
+    rooms.append((str(i), "Standard", 500000, "Available"))
+
+# Deluxe: 201–210
+for i in range(201, 211):
+    rooms.append((str(i), "Deluxe", 800000, "Available"))
+
+# Suite: 301–310
+for i in range(301, 311):
+    rooms.append((str(i), "Suite", 1200000, "Available"))
+
+# VIP Villa: 401–410
+for i in range(401, 411):
+    rooms.append((str(i), "VIP Villa", 2500000, "Available"))
     cur.executemany("INSERT INTO rooms VALUES(?,?,?,?)", rooms)
     conn.commit()
 
@@ -106,37 +88,25 @@ if menu=="🏠 Trang chủ":
 
     c1,c2,c3,c4=st.columns(4)
 
-    rooms = pd.read_sql("SELECT * FROM rooms", conn)
+    rooms = pd.read_sql("SELECT * FROM rooms",conn)
 
-standard = len(rooms[rooms["type"] == "Standard"])
-deluxe   = len(rooms[rooms["type"] == "Deluxe"])
-suite    = len(rooms[rooms["type"] == "Suite"])
-vip       = len(rooms[rooms["type"] == "VIP Villa"])
+    c1.metric("Tổng phòng",len(rooms))
+    c2.metric("Standard",len(rooms[rooms.type=="Standard"]))
+    c3.metric("Suite",len(rooms[rooms.type=="Suite"]))
+    c4.metric("VIP",len(rooms[rooms.type=="VIP Villa"]))
 
-c1.metric("Tổng phòng", len(rooms))
-c2.metric("Standard", standard)
-c3.metric("Deluxe", deluxe)
-c4.metric("Suite", suite)
+    st.markdown("---")
+    st.subheader("🌟 Dịch vụ nổi bật")
 
-st.metric("VIP Villa", vip)   # hoặc đưa vào cột khác nếu muốn
+    a,b,c=st.columns(3)
 
-st.markdown("---")
-st.subheader("🌟 Dịch vụ nổi bật")
+    a.info("🍽 Buffet sáng miễn phí")
+    b.info("🏊 Hồ bơi vô cực")
+    c.info("🚗 Đưa đón sân bay")
 
-a, b, c = st.columns(3)
+    st.markdown("---")
 
-with a:
-    st.info("🍽️ Buffet sáng miễn phí")
-
-with b:
-    st.info("🏊 Hồ bơi vô cực")
-
-with c:
-    st.info("🚗 Đưa đón sân bay")
-
-st.markdown("---")
-
-st.subheader("Các hạng phòng")
+    st.subheader("Các hạng phòng")
 
     col1,col2=st.columns(2)
 
