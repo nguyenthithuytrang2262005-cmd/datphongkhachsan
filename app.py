@@ -77,7 +77,7 @@ st.markdown("""
 
 menu = st.sidebar.radio(
     "MENU",
-    ["📊 Dashboard",
+    ["📊 Home",
      "🛏 Room Management",
      "📅 Reservation",
      "🟢 Check In",
