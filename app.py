@@ -45,6 +45,7 @@ conn.commit()
 # Tạo phòng lần đầu
 if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
     rooms = [
+    
     # 20 Standard: 101–120
     for i in range(101, 121):
         rooms.append((str(i), "Standard", 500000, "Available"))
