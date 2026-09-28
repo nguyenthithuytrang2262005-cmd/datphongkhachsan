@@ -25,6 +25,32 @@ price INTEGER,
 status TEXT
 )
 """)
+# ===== THÊM PHÒNG MỚI (chỉ thêm nếu chưa tồn tại) =====
+
+new_rooms = []
+
+# Standard 103–120
+for i in range(103, 121):
+    new_rooms.append((str(i), "Standard", 500000, "Available"))
+
+# Deluxe 203–220
+for i in range(203, 221):
+    new_rooms.append((str(i), "Deluxe", 800000, "Available"))
+
+# Suite 303–315
+for i in range(303, 316):
+    new_rooms.append((str(i), "Suite", 1200000, "Available"))
+
+# VIP Villa 402–405
+for i in range(402, 406):
+    new_rooms.append((str(i), "VIP Villa", 2500000, "Available"))
+
+cur.executemany("""
+INSERT OR IGNORE INTO rooms(room,type,price,status)
+VALUES(?,?,?,?)
+""", new_rooms)
+
+conn.commit()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS bookings(
