@@ -121,7 +121,7 @@ c4.metric("Suite", suite)
 st.metric("VIP Villa", vip)   # hoặc đưa vào cột khác nếu muốn
 
 st.markdown("---")
-    st.subheader("🌟 Dịch vụ nổi bật")
+st.subheader("🌟 Dịch vụ nổi bật")
 
     a,b,c=st.columns(3)
 
