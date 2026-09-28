@@ -61,7 +61,7 @@ if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
     # 5 VIP Villa
     for i in range(401, 406):
         rooms.append((str(i), "VIP Villa", 2500000, "Available"))
-    ]
+    
     cur.executemany("INSERT INTO rooms VALUES(?,?,?,?)", rooms)
     conn.commit()
 
