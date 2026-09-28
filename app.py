@@ -44,7 +44,7 @@ conn.commit()
 
 # Tạo phòng lần đầu
 if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
-rooms = []
+ rooms = []
 
 # Standard: 101–110
 for i in range(101, 111):
