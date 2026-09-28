@@ -31,7 +31,7 @@ new_rooms = []
 
 # Standard 103–120
 for i in range(103, 121):
-    new_rooms.append((str(i), "Standard", 500000, "Available"))
+    new_rooms.append((str(i), "Standard", 600000, "Available"))
 
 # Deluxe 203–220
 for i in range(203, 221):
