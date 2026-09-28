@@ -367,4 +367,4 @@ elif menu=="📈 Revenue":
 
         st.plotly_chart(fig,use_container_width=True)
 
-        st.dataframe(df,use_container_width=True) đổi code ở đẩu để tổng số lhongf là 40
+        st.dataframe(df,use_container_width=True)
