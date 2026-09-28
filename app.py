@@ -39,7 +39,7 @@ elif menu=="🛏 Đặt phòng":
     rooms=load_rooms(); avail=rooms[rooms.status=="Available"]
     with st.form("book"):
         name=st.text_input("Họ tên"); phone=st.text_input("SĐT")
-        room=st.selectbox("Phòng",avail.no)
+        room=st.selectbox("Phòng",avail.no).tolist
         ci=st.date_input("Nhận",date.today()); co=st.date_input("Trả",date.today())
         pay=st.selectbox("Thanh toán",["Cash","Visa","Momo"])
         ok=st.form_submit_button("Xác nhận")
