@@ -5,7 +5,7 @@ from datetime import datetime, date
 import plotly.express as px
 import qrcode
 from io import BytesIO
-
+st.image("logo1.jpg")
 st.set_page_config(
     page_title="HAPPY HOTEL",
     page_icon="🏨",
