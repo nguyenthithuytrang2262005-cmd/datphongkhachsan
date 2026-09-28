@@ -31,7 +31,7 @@ new_rooms = []
 
 # Standard 103–120
 for i in range(103, 121):
-    new_rooms.append((str(i), "Standard", 600000, "Available"))
+    new_rooms.append((str(i), "Standard", 500000, "Available"))
 
 # Deluxe 203–220
 for i in range(203, 221):
@@ -71,8 +71,8 @@ conn.commit()
 # Tạo phòng lần đầu
 if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
     rooms = [
-        ("101","Standard",600000,"Available"),
-        ("102","Standard",600000,"Available"),
+        ("101","Standard",500000,"Available"),
+        ("102","Standard",500000,"Available"),
         ("201","Deluxe",800000,"Available"),
         ("202","Deluxe",800000,"Available"),
         ("301","Suite",1200000,"Available"),
