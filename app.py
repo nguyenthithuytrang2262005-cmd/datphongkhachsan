@@ -109,13 +109,13 @@ st.subheader("🌟 Dịch vụ nổi bật")
 
 a,b,c=st.columns(3)
 
-    a.info("🍽 Buffet sáng miễn phí")
-    b.info("🏊 Hồ bơi vô cực")
-    c.info("🚗 Đưa đón sân bay")
+a.info("🍽 Buffet sáng miễn phí")
+b.info("🏊 Hồ bơi vô cực")
+c.info("🚗 Đưa đón sân bay")
 
-    st.markdown("---")
+st.markdown("---")
 
-    st.subheader("Các hạng phòng")
+st.subheader("Các hạng phòng")
 
     col1,col2=st.columns(2)
 
