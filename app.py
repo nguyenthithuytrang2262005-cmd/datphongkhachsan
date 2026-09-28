@@ -83,7 +83,8 @@ menu = st.sidebar.radio(
      "🟢 Check In",
      "🔴 Check Out",
      "👥 Guests",
-     "📈 Revenue"]
+     "📈 Revenue",
+     "💬 AI ChatBox"]
 )
 
 rooms = load_rooms()
@@ -368,3 +369,90 @@ elif menu=="📈 Revenue":
         st.plotly_chart(fig,use_container_width=True)
 
         st.dataframe(df,use_container_width=True)
+        
+        # ============== AI CHATBOX =======================
+
+elif menu == "💬 AI ChatBox":
+
+    st.subheader("💬 HAPPY HOTEL AI Assistant")
+    st.caption("Trợ lý ảo hỗ trợ khách hàng và lễ tân 24/7")
+
+    # Lưu lịch sử chat
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {
+                "role": "assistant",
+                "content": "👋 Xin chào! Tôi là trợ lý của HAPPY HOTEL. Tôi có thể giúp đặt phòng, giá phòng, check-in/check-out và thông tin khách sạn."
+            }
+        ]
+
+    # Hiển thị lịch sử
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+
+    prompt = st.chat_input("Nhập câu hỏi của bạn...")
+
+    if prompt:
+        st.session_state.messages.append(
+            {"role": "user", "content": prompt}
+        )
+
+        with st.chat_message("user"):
+            st.write(prompt)
+
+        text = prompt.lower()
+
+        # AI trả lời theo dữ liệu khách sạn
+        if "giá" in text or "price" in text:
+            price_list = rooms.groupby("type")["price"].first()
+            reply = "### 💵 Bảng giá phòng\n"
+            for t, p in price_list.items():
+                reply += f"- **{t}**: {p:,} VND/đêm\n"
+
+        elif "phòng trống" in text or "available" in text:
+            av = rooms[rooms.status == "Available"]
+            if len(av) == 0:
+                reply = "Hiện tại không còn phòng trống."
+            else:
+                reply = "### 🟢 Phòng đang trống\n"
+                for _, r in av.iterrows():
+                    reply += f"- Phòng **{r.room}** ({r.type})\n"
+
+        elif "check in" in text:
+            reply = "🟢 Giờ Check-in: **14:00**"
+
+        elif "check out" in text:
+            reply = "🔴 Giờ Check-out: **12:00**"
+
+        elif "wifi" in text:
+            reply = "📶 Wifi: **HAPPYHOTEL_FREE**\nMật khẩu: **happy123**"
+
+        elif "địa chỉ" in text:
+            reply = "📍 HAPPY HOTEL - 123 Đường Biển, Vũng Tàu"
+
+        elif "liên hệ" in text or "sdt" in text:
+            reply = "☎ Hotline: **0909 888 999**"
+
+        elif "doanh thu" in text:
+            rev = bookings[bookings.status=="Completed"]["total"].sum()
+            reply = f"💰 Tổng doanh thu hiện tại: **{rev:,} VND**"
+
+        else:
+            reply = (
+                "Tôi có thể hỗ trợ:\n\n"
+                "• 💵 Giá phòng\n"
+                "• 🛏 Phòng còn trống\n"
+                "• 📅 Đặt phòng\n"
+                "• 🟢 Giờ Check-in\n"
+                "• 🔴 Giờ Check-out\n"
+                "• 📶 Wifi\n"
+                "• 💰 Doanh thu"
+            )
+
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply}
+        )
+
+        with st.chat_message("assistant"):
+            st.markdown(reply)
