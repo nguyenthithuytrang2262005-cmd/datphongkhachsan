@@ -108,21 +108,28 @@ if menu=="📊 Dashboard":
     occ = round((occupied/total_rooms)*100,1)
     c4.metric("Occupancy",f"{occ}%")
 
-    st.divider()
+    st.subheader("🏨 Room Categories")
 
-    st.subheader("Room Status")
+room_types = (
+    rooms.groupby("type", as_index=False)
+         .agg(
+             price=("price", "first"),
+             quantity=("room", "count")
+         )
+)
 
-    color_map={
-        "Available":"green",
-        "Occupied":"red",
-        "Reserved":"blue",
-        "Maintenance":"orange",
-        "Cleaning":"purple"
-    }
+cols = st.columns(len(room_types))
 
-    cols=st.columns(3)
-
-    for i,row in rooms.iterrows():
+for i, row in room_types.iterrows():
+    with cols[i]:
+        st.markdown(f"""
+        <div style="padding:18px;border-radius:12px;background:#F5F5F5;
+                    text-align:center;">
+            <h4>{row['type']}</h4>
+            <h3 style="color:#0EA5E9;">{row['price']:,} VND</h3>
+            <p>🛏 {row['quantity']} phòng</p>
+        </div>
+        """, unsafe_allow_html=True)
         with cols[i%3]:
             st.markdown(
                 f"""
