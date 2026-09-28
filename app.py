@@ -94,56 +94,41 @@ bookings = load_bookings()
 
 if menu=="📊 Dashboard":
 
-    total_rooms=len(rooms)
-    available=len(rooms[rooms.status=="Available"])
-    occupied=len(rooms[rooms.status=="Occupied"])
+    total_rooms = len(rooms)
+    available = len(rooms[rooms.status=="Available"])
+    occupied = len(rooms[rooms.status=="Occupied"])
 
-    revenue=bookings[bookings.status=="Completed"]["total"].sum() if len(bookings)>0 else 0
+    revenue = bookings[bookings.status=="Completed"]["total"].sum() if len(bookings)>0 else 0
 
-    c1,c2,c3,c4=st.columns(4)
-
-    c1.metric("Total Rooms",total_rooms)
-    c2.metric("Available",available)
-    c3.metric("Occupied",occupied)
-    occ = round((occupied/total_rooms)*100,1)
-    c4.metric("Occupancy",f"{occ}%")
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("Total Rooms", total_rooms)
+    c2.metric("Available", available)
+    c3.metric("Occupied", occupied)
+    c4.metric("Occupancy", f"{round((occupied/total_rooms)*100,1)}%")
 
     st.divider()
+
+    # ROOM CATEGORIES
+    st.subheader("🏨 Room Categories")
 
     room_types = rooms.groupby("type")["price"].first().reset_index()
+    cols = st.columns(len(room_types))
 
-cols = st.columns(len(room_types))
-
-for i, row in room_types.iterrows():
-    with cols[i]:
-        st.markdown(f"""
-        <div style="padding:18px; border-radius:12px;
-                    background:#F8F9FA; text-align:center;
-                    border:1px solid #EAEAEA;">
-            <h4>{row['type']}</h4>
-            <h3 style="color:#16A34A;">{row['price']:,} VND</h3>
-            <p>/ night</p>
-        </div>
-        """, unsafe_allow_html=True)
-        with cols[i%3]:
-            st.markdown(
-                f"""
-                <div style='padding:15px;border-radius:12px;
-                background:#f5f5f5;margin-bottom:10px'>
-                <h3>{row.room}</h3>
-                <b>{row.type}</b><br>
-                💵 {row.price:,} VND<br>
-                <font color='{color_map[row.status]}'>● {row.status}</font>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    for i, row in room_types.iterrows():
+        with cols[i]:
+            st.markdown(f"""
+            <div style="padding:16px;border-radius:12px;background:#F8F9FA;text-align:center">
+                <h4>{row['type']}</h4>
+                <h3>{row['price']:,} VND</h3>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.divider()
-
     st.subheader("Revenue Summary")
-    st.metric("Total Revenue",f"{revenue:,} VND")
+    st.metric("Total Revenue", f"{revenue:,} VND")
 
+elif menu=="🛏 Room Management":
+    ...
 # =============== ROOM =========================
 
 elif menu=="🛏 Room Management":
