@@ -151,9 +151,9 @@ for i, row in room_types.iterrows():
 
 # =============== ROOM =========================
 
-elif menu=="🛏 Room Management":
+elif menu=="🛏 Room Categories":
 
-    st.subheader("Room Management")
+    st.subheader("Room Categories")
 
     st.dataframe(rooms,use_container_width=True)
 
