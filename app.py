@@ -117,7 +117,7 @@ st.markdown("---")
 
 st.subheader("Các hạng phòng")
 
-    col1,col2=st.columns(2)
+col1,col2=st.columns(2)
 
     with col1:
         st.image("https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800")
