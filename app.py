@@ -119,7 +119,7 @@ st.subheader("Các hạng phòng")
 
 col1,col2=st.columns(2)
 
-    with col1:
+with col1:
         st.image("https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800")
         st.write("### Standard")
         st.write("500.000 VNĐ/đêm")
@@ -128,7 +128,7 @@ col1,col2=st.columns(2)
         st.write("### Suite")
         st.write("1.200.000 VNĐ/đêm")
 
-    with col2:
+with col2:
         st.image("https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800")
         st.write("### Deluxe")
         st.write("800.000 VNĐ/đêm")
