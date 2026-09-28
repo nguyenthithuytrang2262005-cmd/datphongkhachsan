@@ -1,370 +1,106 @@
 import streamlit as st
-import sqlite3
-import pandas as pd
-from datetime import datetime, date
-import plotly.express as px
-import qrcode
+import sqlite3, pandas as pd, plotly.express as px, qrcode
+from datetime import date, datetime
 from io import BytesIO
 
-st.set_page_config(
-    page_title="HAPPY HOTEL",
-    page_icon="🏨",
-    layout="wide"
-)
+st.set_page_config(page_title="HAPPY HOTEL", page_icon="🏨", layout="wide")
 
-# ================= DATABASE ===================
-
-conn = sqlite3.connect("hotel.db", check_same_thread=False)
-cur = conn.cursor()
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS rooms(
-room TEXT PRIMARY KEY,
-type TEXT,
-price INTEGER,
-status TEXT
-)
-""")
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS bookings(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-guest TEXT,
-phone TEXT,
-idcard TEXT,
-room TEXT,
-checkin TEXT,
-checkout TEXT,
-guests INTEGER,
-status TEXT,
-total INTEGER
-)
-""")
-
+conn=sqlite3.connect("hotel.db",check_same_thread=False); c=conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS rooms(no TEXT PRIMARY KEY, type TEXT, price INT, status TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS bookings(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,phone TEXT,room TEXT,cin TEXT,cout TEXT,nights INT,total INT,status TEXT)")
 conn.commit()
-
-# insert default rooms
-if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
-    rooms = [
-        ("101","Standard",500000,"Available"),
-        ("102","Standard",500000,"Available"),
-        ("201","Deluxe",700000,"Available"),
-        ("202","Deluxe",700000,"Available"),
-        ("301","Suite",1200000,"Available"),
-        ("302","VIP",1800000,"Maintenance")
-    ]
-    cur.executemany("INSERT INTO rooms VALUES(?,?,?,?)", rooms)
+if c.execute("SELECT COUNT(*) FROM rooms").fetchone()[0]==0:
+    cfg=[("Standard",10,500000),("Superior",10,650000),("Deluxe",12,850000),("Executive",10,1100000),("Suite",10,1500000),("Presidential",8,2500000)]
+    n=101
+    for t,qty,p in cfg:
+        for _ in range(qty):
+            c.execute("INSERT INTO rooms VALUES(?,?,?,?)",(str(n),t,p,"Available")); n+=1
     conn.commit()
 
-# ================= FUNCTIONS ==================
+menu=st.sidebar.radio("MENU",["🏠 Dashboard","🛏️ Đặt phòng","✅ Check-In","🚪 Check-Out","💳 Thanh toán","🏨 Quản lý phòng","📊 Thống kê","🤖 Happy AI Chat"])
+st.title("🏨 HAPPY HOTEL")
 
-def load_rooms():
-    return pd.read_sql("SELECT * FROM rooms", conn)
+rooms=pd.read_sql("SELECT * FROM rooms",conn)
+books=pd.read_sql("SELECT * FROM bookings",conn)
 
-def load_bookings():
-    return pd.read_sql("SELECT * FROM bookings", conn)
-
-def update_room(room,status):
-    cur.execute("UPDATE rooms SET status=? WHERE room=?",(status,room))
-    conn.commit()
-
-# ================== HEADER ====================
-
-st.markdown("""
-# 🏨 HAPPY HOTEL
-### Luxury Hotel Management System
-""")
-
-menu = st.sidebar.radio(
-    "MENU",
-    ["📊 Dashboard",
-     "🛏 Room Management",
-     "📅 Reservation",
-     "🟢 Check In",
-     "🔴 Check Out",
-     "👥 Guests",
-     "📈 Revenue"]
-)
-
-rooms = load_rooms()
-bookings = load_bookings()
-
-# ================= DASHBOARD ==================
-
-if menu=="📊 Dashboard":
-
-    total_rooms=len(rooms)
-    available=len(rooms[rooms.status=="Available"])
-    occupied=len(rooms[rooms.status=="Occupied"])
-
-    revenue=bookings[bookings.status=="Completed"]["total"].sum() if len(bookings)>0 else 0
-
+if menu=="🏠 Dashboard":
+    a=(rooms.status=="Available").sum(); o=(rooms.status=="Occupied").sum()
+    rev=books.total.sum() if len(books) else 0
     c1,c2,c3,c4=st.columns(4)
-
-    c1.metric("Total Rooms",total_rooms)
-    c2.metric("Available",available)
-    c3.metric("Occupied",occupied)
-    occ = round((occupied/total_rooms)*100,1)
-    c4.metric("Occupancy",f"{occ}%")
-
-    st.divider()
-
-    st.subheader("Room Status")
-
-    color_map={
-        "Available":"green",
-        "Occupied":"red",
-        "Reserved":"blue",
-        "Maintenance":"orange",
-        "Cleaning":"purple"
-    }
-
-    cols=st.columns(3)
-
-    for i,row in rooms.iterrows():
-        with cols[i%3]:
-            st.markdown(
-                f"""
-                <div style='padding:15px;border-radius:12px;
-                background:#f5f5f5;margin-bottom:10px'>
-                <h3>{row.room}</h3>
-                <b>{row.type}</b><br>
-                💵 {row.price:,} VND<br>
-                <font color='{color_map[row.status]}'>● {row.status}</font>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    st.divider()
-
-    st.subheader("Revenue Summary")
-    st.metric("Total Revenue",f"{revenue:,} VND")
-
-# =============== ROOM =========================
-
-elif menu=="🛏 Room Management":
-
-    st.subheader("Room Management")
-
+    c1.metric("Tổng phòng",len(rooms)); c2.metric("Đang trống",a); c3.metric("Đã thuê",o); c4.metric("Doanh thu",f"{rev:,} đ")
     st.dataframe(rooms,use_container_width=True)
 
-    with st.expander("➕ Add Room"):
+elif menu=="🛏️ Đặt phòng":
+    n=st.text_input("Họ tên"); p=st.text_input("SĐT")
+    typ=st.selectbox("Hạng",sorted(rooms.type.unique()))
+    ci=st.date_input("Check in",date.today()); co=st.date_input("Check out",date.today())
+    av=rooms[(rooms.type==typ)&(rooms.status=="Available")]
+    if len(av): rm=st.selectbox("Phòng",av.no)
+    else: st.warning("Hết phòng"); rm=None
+    if rm:
+        price=int(av[av.no==rm].price.iloc[0]); nights=max((co-ci).days,1); total=price*nights
+        st.info(f"{nights} đêm | {price:,} đ | Tổng {total:,} đ")
+        if st.button("Xác nhận đặt phòng"):
+            c.execute("INSERT INTO bookings(name,phone,room,cin,cout,nights,total,status) VALUES(?,?,?,?,?,?,?,?)",(n,p,rm,str(ci),str(co),nights,total,"Booked"))
+            c.execute("UPDATE rooms SET status='Booked' WHERE no=?",(rm,)); conn.commit(); st.success("Đặt thành công")
+            qr=qrcode.make(f"{n}|{rm}|{ci}|{co}")
+            buf=BytesIO(); qr.save(buf); st.image(buf.getvalue(),caption="QR xác nhận",width=180)
 
-        r=st.text_input("Room Number")
-        t=st.selectbox("Type",["Standard","Deluxe","Suite","VIP"])
-        p=st.number_input("Price",100000,5000000,500000)
-
-        if st.button("Add Room"):
-            cur.execute("INSERT INTO rooms VALUES(?,?,?,?)",(r,t,p,"Available"))
-            conn.commit()
-            st.success("Added")
-            st.rerun()
-
-    st.divider()
-
-    room_select=st.selectbox("Select Room",rooms.room)
-
-    new_status=st.selectbox("Change Status",
-        ["Available","Occupied","Reserved","Cleaning","Maintenance"])
-
-    if st.button("Update Status"):
-        update_room(room_select,new_status)
-        st.success("Updated")
-        st.rerun()
-
-# ============== RESERVATION ===================
-
-elif menu=="📅 Reservation":
-
-    st.subheader("New Reservation")
-
-    available_rooms=rooms[rooms.status=="Available"]
-
-    if len(available_rooms)==0:
-        st.error("No available room")
-        st.stop()
-
-    name=st.text_input("Guest Name")
-    phone=st.text_input("Phone")
-    idcard=st.text_input("ID Card")
-
-    guests=st.slider("Guests",1,6,2)
-
-    room=st.selectbox("Choose Room",available_rooms.room)
-
-    c1,c2=st.columns(2)
-    checkin=c1.date_input("Check In",date.today())
-    checkout=c2.date_input("Check Out",date.today())
-
-    price=int(rooms[rooms.room==room].price.values[0])
-
-    nights=max((checkout-checkin).days,1)
-    total=price*nights
-
-    st.info(f"{nights} night(s) | Total = {total:,} VND")
-
-    # AI Recommendation
-    st.markdown("### 🤖 Smart Recommendation")
-
-    if guests<=2:
-        st.success("Recommended: Standard / Deluxe")
-    elif guests<=4:
-        st.success("Recommended: Deluxe / Suite")
+elif menu=="✅ Check-In":
+    b=pd.read_sql("SELECT * FROM bookings WHERE status='Booked'",conn)
+    if len(b)==0: st.info("Không có đặt phòng")
     else:
-        st.success("Recommended: VIP")
-
-    if st.button("Reserve"):
-
-        cur.execute("""
-        INSERT INTO bookings
-        (guest,phone,idcard,room,checkin,checkout,guests,status,total)
-        VALUES(?,?,?,?,?,?,?,?,?)
-        """,
-        (name,phone,idcard,room,
-        str(checkin),str(checkout),guests,"Reserved",total))
-
-        update_room(room,"Reserved")
-
-        conn.commit()
-
-        st.success("Reservation Successful!")
-
-        # QR
-        qr=qrcode.make(f"{name}-{room}-{checkin}")
-        buf=BytesIO()
-        qr.save(buf)
-        st.image(buf)
-
-# ============== CHECKIN =======================
-
-elif menu=="🟢 Check In":
-
-    reserved=bookings[bookings.status=="Reserved"]
-
-    st.subheader("Check In")
-
-    if len(reserved)==0:
-        st.info("No reservation")
-    else:
-
-        book_id=st.selectbox(
-            "Booking ID",
-            reserved.id
-        )
-
-        row=reserved[reserved.id==book_id].iloc[0]
-
-        st.write(f"**Guest:** {row.guest}")
-        st.write(f"Room: {row.room}")
-
+        bid=st.selectbox("Booking",b.id)
+        row=b[b.id==bid].iloc[0]
+        st.write(row[["name","room","cin","cout"]])
         if st.button("Check In"):
+            c.execute("UPDATE bookings SET status='Checked-In' WHERE id=?",(int(bid),))
+            c.execute("UPDATE rooms SET status='Occupied' WHERE no=?",(row.room,)); conn.commit(); st.success("Check-in!")
 
-            cur.execute("""
-            UPDATE bookings
-            SET status='Checked In'
-            WHERE id=?
-            """,(int(book_id),))
-
-            update_room(row.room,"Occupied")
-            conn.commit()
-
-            st.success("Checked In")
-            st.rerun()
-
-# ============== CHECKOUT ======================
-
-elif menu=="🔴 Check Out":
-
-    staying=bookings[bookings.status=="Checked In"]
-
-    st.subheader("Check Out")
-
-    if len(staying)==0:
-        st.info("No guest staying")
-
+elif menu=="🚪 Check-Out":
+    b=pd.read_sql("SELECT * FROM bookings WHERE status='Checked-In'",conn)
+    if len(b)==0: st.info("Không có khách")
     else:
+        bid=st.selectbox("Khách",b.id); row=b[b.id==bid].iloc[0]
+        st.write(f"Khách: {row['name']}"); st.write(f"Tổng: {row['total']:,} đ")
+        if st.button("Check Out"):
+            c.execute("UPDATE bookings SET status='Completed' WHERE id=?",(int(bid),))
+            c.execute("UPDATE rooms SET status='Available' WHERE no=?",(row.room,)); conn.commit(); st.success("Hoàn tất!")
 
-        bid=st.selectbox("Booking",staying.id)
-
-        row=staying[staying.id==bid].iloc[0]
-
-        st.write(f"Guest: {row.guest}")
-        st.write(f"Room: {row.room}")
-
-        st.metric("Total Payment",f"{row.total:,} VND")
-
-        minibar=st.number_input("MiniBar",0,5000000,0)
-        laundry=st.number_input("Laundry",0,5000000,0)
-
-        final=row.total+minibar+laundry
-
-        st.metric("Grand Total",f"{final:,} VND")
-
-        if st.button("Complete Check Out"):
-
-            cur.execute("""
-            UPDATE bookings
-            SET status='Completed',
-            total=?
-            WHERE id=?
-            """,(int(final),int(bid)))
-
-            update_room(row.room,"Cleaning")
-
-            conn.commit()
-
-            st.success("Check Out Completed")
-            st.rerun()
-
-# ============== GUEST =========================
-
-elif menu=="👥 Guests":
-
-    st.subheader("Guest List")
-
-    keyword=st.text_input("Search")
-
-    df=bookings.copy()
-
-    if keyword!="":
-        df=df[df.guest.str.contains(keyword,case=False)]
-
-    st.dataframe(df,use_container_width=True)
-
-    csv=df.to_csv(index=False).encode()
-
-    st.download_button(
-        "⬇ Export CSV",
-        csv,
-        "guests.csv",
-        "text/csv"
-    )
-
-# ============== REVENUE =======================
-
-elif menu=="📈 Revenue":
-
-    st.subheader("Revenue Analytics")
-
-    df=bookings[bookings.status=="Completed"]
-
-    if len(df)==0:
-        st.info("No revenue yet")
+elif menu=="💳 Thanh toán":
+    b=pd.read_sql("SELECT * FROM bookings WHERE status='Completed'",conn)
+    if len(b)==0: st.info("Chưa có hóa đơn")
     else:
+        bid=st.selectbox("Hóa đơn",b.id); row=b[b.id==bid].iloc[0]
+        vat=int(row.total*0.08); grand=row.total+vat
+        st.subheader("HÓA ĐƠN"); st.write(row[["name","room","nights"]]); st.write(f"Tiền phòng: {row['total']:,} đ"); st.write(f"VAT 8%: {vat:,} đ"); st.success(f"Thanh toán: {grand:,} đ")
 
-        df["checkin"]=pd.to_datetime(df["checkin"])
+elif menu=="🏨 Quản lý phòng":
+    ed=st.data_editor(rooms,disabled=["no"],use_container_width=True)
+    if st.button("Lưu thay đổi"):
+        for _,r in ed.iterrows():
+            c.execute("UPDATE rooms SET type=?,price=?,status=? WHERE no=?",(r.type,int(r.price),r.status,r.no))
+        conn.commit(); st.success("Đã lưu")
 
-        daily=df.groupby(df["checkin"].dt.date)["total"].sum().reset_index()
+elif menu=="📊 Thống kê":
+    if len(books):
+        fig=px.bar(books.groupby("room",as_index=False)["total"].sum(),x="room",y="total",title="Doanh thu theo phòng"); st.plotly_chart(fig,use_container_width=True)
+        pie=px.pie(rooms,names="status",title="Tình trạng phòng"); st.plotly_chart(pie,use_container_width=True)
+    else: st.info("Chưa có dữ liệu")
 
-        fig=px.line(
-            daily,
-            x="checkin",
-            y="total",
-            markers=True,
-            title="Daily Revenue"
-        )
-
-        st.plotly_chart(fig,use_container_width=True)
-
-        st.dataframe(df,use_container_width=True)
+elif menu=="🤖 Happy AI Chat":
+    st.subheader("Happy AI")
+    if "chat" not in st.session_state: st.session_state.chat=[]
+    for m in st.session_state.chat:
+        with st.chat_message(m["r"]): st.markdown(m["t"])
+    q=st.chat_input("Hỏi về đặt phòng, giá...")
+    if q:
+        st.session_state.chat.append({"r":"user","t":q})
+        ans="Xin chào! "
+        s=q.lower()
+        if "giá" in s: ans+="Giá từ 500.000đ đến 2.500.000đ/đêm."
+        elif "check" in s: ans+="Check-in 14:00, Check-out 12:00."
+        elif "deluxe" in s: ans+="Deluxe có 12 phòng, 850.000đ/đêm."
+        else: ans+="Tôi hỗ trợ đặt phòng, giá, tiện ích và thủ tục khách sạn."
+        st.session_state.chat.append({"r":"assistant","t":ans})
+        st.rerun()
