@@ -104,8 +104,8 @@ c3.metric("Deluxe", deluxe)
 c4.metric("Suite", suite)
 c5.metric("VIP Villa", vip)
 
-    st.markdown("---")
-    st.subheader("🌟 Dịch vụ nổi bật")
+st.markdown("---")
+st.subheader("🌟 Dịch vụ nổi bật")
 
     a,b,c=st.columns(3)
 
