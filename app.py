@@ -107,7 +107,7 @@ c5.metric("VIP Villa", vip)
 st.markdown("---")
 st.subheader("🌟 Dịch vụ nổi bật")
 
-    a,b,c=st.columns(3)
+a,b,c=st.columns(3)
 
     a.info("🍽 Buffet sáng miễn phí")
     b.info("🏊 Hồ bơi vô cực")
