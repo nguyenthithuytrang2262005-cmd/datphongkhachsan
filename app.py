@@ -2,7 +2,7 @@ import streamlit as st
 import sqlite3, pandas as pd, plotly.express as px, qrcode
 from io import BytesIO
 from datetime import date, datetime
-st.image("logo1")
+st.image("logo1.jpg")
 st.set_page_config(page_title="HAPPY HOTEL", page_icon="🏨", layout="wide")
 
 conn=sqlite3.connect("hotel.db",check_same_thread=False)
