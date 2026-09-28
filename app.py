@@ -106,12 +106,19 @@ if menu=="🏠 Trang chủ":
 
     c1,c2,c3,c4=st.columns(4)
 
-    rooms = pd.read_sql("SELECT * FROM rooms",conn)
+    rooms = pd.read_sql("SELECT * FROM rooms", conn)
 
-    c1.metric("Tổng phòng",len(rooms))
-    c2.metric("Standard",len(rooms[rooms.type=="Standard"]))
-    c3.metric("Suite",len(rooms[rooms.type=="Suite"]))
-    c4.metric("VIP",len(rooms[rooms.type=="VIP Villa"]))
+standard = len(rooms[rooms["type"] == "Standard"])
+deluxe   = len(rooms[rooms["type"] == "Deluxe"])
+suite    = len(rooms[rooms["type"] == "Suite"])
+vip       = len(rooms[rooms["type"] == "VIP Villa"])
+
+c1.metric("Tổng phòng", len(rooms))
+c2.metric("Standard", standard)
+c3.metric("Deluxe", deluxe)
+c4.metric("Suite", suite)
+
+st.metric("VIP Villa", vip)   # hoặc đưa vào cột khác nếu muốn
 
     st.markdown("---")
     st.subheader("🌟 Dịch vụ nổi bật")
