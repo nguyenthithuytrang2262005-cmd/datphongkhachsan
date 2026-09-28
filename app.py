@@ -765,7 +765,54 @@ elif page == "Đặt phòng":
 elif page == "Đánh giá":
     reviews_page()
 elif page == "Chatbot":
-    chatbot_page()
+    st.subheader("🤖 HAPPY HOTEL AI")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "Xin chào! Tôi là trợ lý HAPPY HOTEL. Tôi có thể tư vấn hạng phòng, giá và giờ check-in."
+        }
+    ]
+
+# Hiển thị lịch sử
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# Nhập tin nhắn
+prompt = st.chat_input("Nhập câu hỏi...")
+
+if prompt:
+    st.session_state.messages.append(
+        {"role": "user", "content": prompt}
+    )
+
+    text = prompt.lower()
+
+    if "giá" in text:
+        reply = """**Bảng giá HAPPY HOTEL**
+
+- Standard: 500.000đ
+- Superior: 650.000đ
+- Deluxe: 850.000đ
+- Executive: 1.100.000đ
+- Suite: 1.500.000đ
+- Presidential: 2.500.000đ"""
+    elif "check in" in text or "check-in" in text:
+        reply = "🕑 Check-in từ **14:00** mỗi ngày."
+    elif "check out" in text or "check-out" in text:
+        reply = "🕛 Check-out trước **12:00**."
+    elif "wifi" in text:
+        reply = "📶 WiFi miễn phí toàn khách sạn."
+    else:
+        reply = "Cảm ơn bạn! Tôi có thể hỗ trợ đặt phòng, giá, tiện ích và thủ tục lưu trú."
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": reply}
+    )
+
+    st.rerun()
 elif page == "Đăng nhập":
     login_page()
 elif page == "Đăng ký":
