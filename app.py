@@ -44,23 +44,15 @@ conn.commit()
 
 # Tạo phòng lần đầu
 if cur.execute("SELECT COUNT(*) FROM rooms").fetchone()[0] == 0:
- rooms = []
-
-# Standard: 101–110
-for i in range(101, 111):
-    rooms.append((str(i), "Standard", 500000, "Available"))
-
-# Deluxe: 201–210
-for i in range(201, 211):
-    rooms.append((str(i), "Deluxe", 800000, "Available"))
-
-# Suite: 301–310
-for i in range(301, 311):
-    rooms.append((str(i), "Suite", 1200000, "Available"))
-
-# VIP Villa: 401–410
-for i in range(401, 411):
-    rooms.append((str(i), "VIP Villa", 2500000, "Available"))
+    rooms = [
+        ("101","Standard",500000,"Available"),
+        ("102","Standard",500000,"Available"),
+        ("201","Deluxe",800000,"Available"),
+        ("202","Deluxe",800000,"Available"),
+        ("301","Suite",1200000,"Available"),
+        ("302","Suite",1200000,"Available"),
+        ("401","VIP Villa",2500000,"Available")
+    ]
     cur.executemany("INSERT INTO rooms VALUES(?,?,?,?)", rooms)
     conn.commit()
 
