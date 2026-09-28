@@ -110,19 +110,21 @@ if menu=="📊 Dashboard":
 
     st.divider()
 
-    st.subheader("Room Status")
+    room_types = rooms.groupby("type")["price"].first().reset_index()
 
-    color_map={
-        "Available":"green",
-        "Occupied":"red",
-        "Reserved":"blue",
-        "Maintenance":"orange",
-        "Cleaning":"purple"
-    }
+cols = st.columns(len(room_types))
 
-    cols=st.columns(3)
-
-    for i,row in rooms.iterrows():
+for i, row in room_types.iterrows():
+    with cols[i]:
+        st.markdown(f"""
+        <div style="padding:18px; border-radius:12px;
+                    background:#F8F9FA; text-align:center;
+                    border:1px solid #EAEAEA;">
+            <h4>{row['type']}</h4>
+            <h3 style="color:#16A34A;">{row['price']:,} VND</h3>
+            <p>/ night</p>
+        </div>
+        """, unsafe_allow_html=True)
         with cols[i%3]:
             st.markdown(
                 f"""
