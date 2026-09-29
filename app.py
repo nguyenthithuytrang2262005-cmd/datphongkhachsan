@@ -21,7 +21,7 @@ st.set_page_config(
 DB_HOST = "mysql-6ab5bcf-trandinhphuc1702-e8a7.e.aivencloud.com"
 DB_PORT = 20874
 DB_USER = "avnadmin"
-DB_PASSWORD = "AVNS_0L4tfzDCvAVBs0WWRXK"
+DB_PASSWORD = "AVNS_eVcCgn3_aYwPGTik0Ls"
 DB_NAME = "defaultdb"
 
 # Aiven MySQL normally requires SSL/TLS.
