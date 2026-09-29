@@ -5,7 +5,7 @@ from datetime import date
 import plotly.express as px
 import qrcode
 from io import BytesIO
-
+st.image("logo1.jpg")
 # ============================================================
 # PAGE CONFIG
 # ============================================================
