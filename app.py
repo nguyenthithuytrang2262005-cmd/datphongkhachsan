@@ -183,6 +183,10 @@ def initialize_database():
 # ============================================================
 try:
     initialize_database()
+
+    # Thông báo kết nối thành công
+    st.sidebar.success("🟢 MySQL Aiven: Đã kết nối")
+
 except Exception as e:
     st.error("❌ Không thể kết nối MySQL Aiven.")
     st.code(str(e))
