@@ -1,5 +1,5 @@
 import streamlit as st
-import mysql.connector
+import sqlite3
 import pandas as pd
 from datetime import datetime, date
 import plotly.express as px
@@ -14,28 +14,15 @@ st.set_page_config(
 
 # ================= DATABASE ===================
 
-conn = mysql.connector.connect(
-    host="mysql-6ab5bcf-trandinhphuc1702-e8a7.e.aivencloud.com",
-    user="avnadmin",
-    password="AVNS_OL4tfzDCvAVBs0WWRXK",
-    database="defaultdb",
-    port=20874
-)
-
+conn = sqlite3.connect("hotel.db", check_same_thread=False)
 cur = conn.cursor()
 
 cur.execute("""
-CREATE TABLE IF NOT EXISTS bookings(
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    guest VARCHAR(255),
-    phone VARCHAR(50),
-    idcard VARCHAR(100),
-    room VARCHAR(50),
-    checkin VARCHAR(50),
-    checkout VARCHAR(50),
-    guests INT,
-    status VARCHAR(50),
-    total INT
+CREATE TABLE IF NOT EXISTS rooms(
+room TEXT PRIMARY KEY,
+type TEXT,
+price INTEGER,
+status TEXT
 )
 """)
 
